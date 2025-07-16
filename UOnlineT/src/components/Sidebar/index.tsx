@@ -18,15 +18,18 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }: SidebarProps) => {
 
   useEffect(() => {
     const storedRole = localStorage.getItem("role");
-    setRole(storedRole);
+    if (storedRole) {
+      setRole(storedRole);
+    } else {
+      setRole("guest"); // default role
+    }
   }, []);
 
+  // Jangan render apapun sampai role terbaca
+  if (role === null) return null;
+
   const commonItems = [
-    {
-      icon: <span>🤖</span>,
-      label: "Chatbot",
-      route: "/nlp",
-    },
+    { icon: <span>🤖</span>, label: "Chatbot", route: "/nlp" },
   ];
 
   const adminItems = [
