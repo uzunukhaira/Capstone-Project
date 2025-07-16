@@ -5,7 +5,7 @@ from flask_cors import CORS
 from flask_jwt_extended import JWTManager
 from config import Config
 from models import db
-from routes import auth, chat, kereta, booking
+from routes import auth, chat, kereta, booking ,admin
 from routes.profile import profile_bp
 
 app = Flask(__name__)
@@ -26,6 +26,7 @@ app.register_blueprint(chat.chat_bp)
 app.register_blueprint(kereta.bp)
 app.register_blueprint(booking.bp)
 app.register_blueprint(profile_bp)
+app.register_blueprint(admin.admin_bp)
 
 if not os.path.exists("static/uploads"):
     os.makedirs("static/uploads")

@@ -18,24 +18,45 @@ export default function UserManagement() {
   const [formData, setFormData] = useState<Partial<User>>({});
   const [isEditing, setIsEditing] = useState(false);
 
-  const API_BASE_URL = "http://localhost:5000/users";
+  const API_BASE_URL = "http://localhost:5000/admin/users";
 
-  const fetchWithErrorHandling = async (url: string, options: RequestInit = {}) => {
-    const res = await fetch(url, options);
+  const getToken = (): string | null => {
+    if (typeof window !== "undefined") {
+      const token = localStorage.getItem("access_token");
+      if (!token) {
+        console.warn("Token tidak ditemukan di localStorage.");
+      }
+      return token;
+    }
+    return null;
+  };
+
+  const fetchWithAuth = async (url: string, options: RequestInit = {}) => {
+    const token = getToken();
+    if (!token) throw new Error("Anda belum login. Token tidak ditemukan.");
+
+    const res = await fetch(url, {
+      ...options,
+      headers: {
+        ...(options.headers || {}),
+        Authorization: `Bearer ${token}`,
+        "Content-Type": "application/json",
+      },
+    });
+
     const text = await res.text();
-
     try {
       return JSON.parse(text);
     } catch {
-      console.error("Unexpected HTML response:", text);
-      throw new Error("Terjadi kesalahan saat mengambil data.");
+      console.error("Respon bukan JSON:", text);
+      throw new Error("Terjadi kesalahan pada server.");
     }
   };
 
   useEffect(() => {
     const fetchUsers = async () => {
       try {
-        const data = await fetchWithErrorHandling(API_BASE_URL);
+        const data = await fetchWithAuth(API_BASE_URL);
         setUsers(data);
       } catch (err: any) {
         setError(err.message);
@@ -54,34 +75,34 @@ export default function UserManagement() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+
     const method = isEditing ? "PUT" : "POST";
     const url = isEditing ? `${API_BASE_URL}/${formData.id}` : API_BASE_URL;
 
     try {
-      const userData = {
+      const payload = {
         name: formData.name,
         email: formData.email,
         password: formData.password,
         role: formData.role,
       };
 
-      const savedUser = await fetchWithErrorHandling(url, {
+      const savedUser = await fetchWithAuth(url, {
         method,
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(userData),
+        body: JSON.stringify(payload),
       });
 
-      if (isEditing) {
-        setUsers(users.map((user) => (user.id === savedUser.id ? savedUser : user)));
-      } else {
-        setUsers([...users, savedUser]);
-      }
+      setUsers((prev) =>
+        isEditing
+          ? prev.map((user) => (user.id === savedUser.id ? savedUser : user))
+          : [...prev, savedUser]
+      );
 
+      alert("Data user berhasil disimpan!");
       setFormData({});
       setIsEditing(false);
-      alert("Data user berhasil disimpan!");
     } catch (err: any) {
-      alert(err.message);
+      alert(`Gagal menyimpan data: ${err.message}`);
     }
   };
 
@@ -89,11 +110,11 @@ export default function UserManagement() {
     if (!confirm("Yakin ingin menghapus user ini?")) return;
 
     try {
-      await fetchWithErrorHandling(`${API_BASE_URL}/${id}`, { method: "DELETE" });
-      setUsers(users.filter((user) => user.id !== id));
+      await fetchWithAuth(`${API_BASE_URL}/${id}`, { method: "DELETE" });
+      setUsers((prev) => prev.filter((u) => u.id !== id));
       alert("User berhasil dihapus!");
     } catch (err: any) {
-      alert(err.message);
+      alert(`Gagal menghapus user: ${err.message}`);
     }
   };
 
@@ -154,7 +175,7 @@ export default function UserManagement() {
         </form>
 
         {isLoading ? (
-          <p>Loading...</p>
+          <p>Memuat data...</p>
         ) : error ? (
           <p className="text-red-600">{error}</p>
         ) : (
@@ -175,16 +196,16 @@ export default function UserManagement() {
                   <td className="border px-2 py-1">{user.name}</td>
                   <td className="border px-2 py-1">{user.email}</td>
                   <td className="border px-2 py-1">{user.role}</td>
-                  <td className="border px-2 py-1 space-x-2 text-center">
+                  <td className="border px-2 py-1 text-center space-x-2">
                     <button
-                      className="bg-yellow-500 px-2 py-1 text-white"
                       onClick={() => handleEdit(user)}
+                      className="bg-yellow-500 text-white px-2 py-1"
                     >
                       Edit
                     </button>
                     <button
-                      className="bg-red-600 px-2 py-1 text-white"
                       onClick={() => handleDelete(user.id)}
+                      className="bg-red-600 text-white px-2 py-1"
                     >
                       Hapus
                     </button>

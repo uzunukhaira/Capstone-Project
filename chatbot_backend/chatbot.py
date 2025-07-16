@@ -35,14 +35,11 @@ def process_message(message):
     rute_cocok = df["rute"].apply(lambda r: any(k in r.lower() for k in kata_kunci))
     if rute_cocok.any():
         filtered = filtered[rute_cocok]
-
     if tanggal_diminta:
         filtered = filtered[filtered["tanggal"] == pd.to_datetime(tanggal_diminta)]
-
     if "jadwal" in message:
         if filtered.empty:
             return "❌ Tidak ada jadwal ditemukan sesuai permintaan Anda."
-        
         hasil = []
         for _, row in filtered.iterrows():
             hasil.append(

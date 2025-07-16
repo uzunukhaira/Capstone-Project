@@ -18,6 +18,8 @@ export default function RiwayatPage() {
   const router = useRouter();
 
   useEffect(() => {
+    let isMounted = true;
+
     const fetchChatHistory = async () => {
       const token = localStorage.getItem("access_token");
 
@@ -35,26 +37,28 @@ export default function RiwayatPage() {
         });
 
         if (res.status === 401) {
-          localStorage.removeItem("access_token");
+          localStorage.clear();
           router.push("/login");
           return;
         }
 
         const data = await res.json();
-        if (Array.isArray(data)) {
-          setRiwayat(data);
-        } else {
-          setRiwayat([]);
+        if (isMounted) {
+          setRiwayat(Array.isArray(data) ? data : []);
         }
       } catch (err) {
         console.error("Gagal memuat riwayat chat:", err);
-        setRiwayat([]);
+        if (isMounted) setRiwayat([]);
       } finally {
-        setLoading(false);
+        if (isMounted) setLoading(false);
       }
     };
 
     fetchChatHistory();
+
+    return () => {
+      isMounted = false;
+    };
   }, [router]);
 
   return (

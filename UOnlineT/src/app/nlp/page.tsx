@@ -3,10 +3,11 @@
 import { useEffect, useState } from "react";
 import DefaultLayout from "@/components/Layouts/DefaultLayout";
 
-// Fungsi untuk ambil token dari cookie
-function getTokenFromCookie(): string | null {
-  const match = document.cookie.match(/token=([^;]+)/);
-  return match ? match[1] : null;
+function getToken(): string | null {
+  if (typeof window !== "undefined") {
+    return localStorage.getItem("access_token");
+  }
+  return null;
 }
 
 export default function NlpChat() {
@@ -14,7 +15,6 @@ export default function NlpChat() {
   const [chat, setChat] = useState<{ from: string; text: string }[]>([]);
   const [loading, setLoading] = useState(false);
 
-  // Pesan sambutan awal dari bot
   useEffect(() => {
     setChat([
       {
@@ -33,13 +33,13 @@ export default function NlpChat() {
     setLoading(true);
 
     try {
-      const token = getTokenFromCookie();
+      const token = getToken();
 
       const res = await fetch("http://localhost:5000/api/chat", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          Authorization: token ? `Bearer ${token}` : "",
+          ...(token && { Authorization: `Bearer ${token}` }),
         },
         body: JSON.stringify({ message: userMessage }),
       });
@@ -61,6 +61,7 @@ export default function NlpChat() {
     <DefaultLayout>
       <div className="flex h-full flex-col">
         <h1 className="mb-4 text-2xl font-bold">💬 Chat Jadwal Kereta</h1>
+
         <div className="max-h-[70vh] flex-1 space-y-2 overflow-y-auto rounded-lg bg-white p-4 shadow-inner">
           {chat.map((c, idx) => (
             <div
@@ -78,6 +79,7 @@ export default function NlpChat() {
               </div>
             </div>
           ))}
+
           {loading && (
             <div className="flex justify-start">
               <div className="max-w-xs rounded-xl bg-gray-400 px-4 py-2 text-white">

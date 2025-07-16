@@ -1,9 +1,9 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import Image from "next/image";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
+import DefaultLayout from "@/components/Layouts/DefaultLayout";
 
 interface User {
   id: number;
@@ -15,22 +15,48 @@ interface User {
 
 export default function ProfilePage() {
   const [user, setUser] = useState<User | null>(null);
+  const [loading, setLoading] = useState(true);
   const router = useRouter();
 
   useEffect(() => {
-    const userData = localStorage.getItem("user");
-    if (!userData) {
-      router.push("/login");
-      return;
-    }
+    const fetchProfile = async () => {
+      const token = localStorage.getItem("access_token");
+      if (!token) {
+        router.push("/login");
+        return;
+      }
 
-    const parsedUser = JSON.parse(userData);
-    setUser(parsedUser);
+      try {
+        const res = await fetch("http://localhost:5000/auth/me", {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
+
+        if (res.status === 401) {
+          localStorage.clear();
+          router.push("/login");
+          return;
+        }
+
+        const data = await res.json();
+        setUser(data);
+      } catch (error) {
+        console.error("Gagal memuat data user:", error);
+        router.push("/login");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchProfile();
   }, [router]);
 
+  if (loading) return <div className="p-8 text-center">Memuat...</div>;
   if (!user) return null;
 
   return (
+    <DefaultLayout>
     <div className="p-8 max-w-xl mx-auto">
       <h1 className="text-2xl font-bold mb-6">Profil Pengguna</h1>
       <div className="bg-white shadow rounded-lg p-6">
@@ -64,5 +90,6 @@ export default function ProfilePage() {
         </div>
       </div>
     </div>
+    </DefaultLayout>
   );
 }
