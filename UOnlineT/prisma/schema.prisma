@@ -1,0 +1,74 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Produk {
+  id          Int          @id @default(autoincrement())
+  nama_produk String
+  harga       Float
+  stok        Int
+  deskripsi   String?
+  pembelian   Pembelian[]   @relation("ProdukPembelian")
+  pengiriman  Pengiriman[]  @relation("ProdukPengiriman")
+
+  Supplier Supplier[] @relation("SupplierProduk")
+}
+
+model Supplier {
+  id            Int          @id @default(autoincrement())
+  nama_supplier String
+  kontak        String?
+  alamat        String?
+  produk        Produk[]     @relation("SupplierProduk")
+}
+
+model Pembelian {
+  id           Int       @id @default(autoincrement())
+  id_produk    Int
+  jumlah       Int
+  total_harga  Float
+  nameproduk   String?
+  status       String?
+  produk       Produk     @relation("ProdukPembelian", fields: [id_produk], references: [id])
+}
+
+model Pengiriman {
+  id                 Int       @id @default(autoincrement())
+  id_produk          Int
+  tanggal_pengiriman DateTime
+  alamat_pengiriman  String
+  status_pengiriman  String
+  produk             Produk    @relation("ProdukPengiriman", fields: [id_produk], references: [id])
+}
+
+model User {
+  id       Int       @id @default(autoincrement())
+  name     String
+  email    String    @unique
+  password String
+  role     String    @default("user")
+  logs     Log[]     @relation("UserLogs")
+}
+
+model Status {
+  id         Int       @id @default(autoincrement())
+  name       String
+  status     String
+  status_p   String
+  logs       Log[]     @relation("StatusLogs")
+}
+
+model Log {
+  id        Int       @id @default(autoincrement())
+  user_id   Int
+  action    String
+  timestamp DateTime   @default(now())
+  user      User       @relation("UserLogs", fields: [user_id], references: [id])
+  status    Status?    @relation("StatusLogs", fields: [statusid], references: [id])
+statusid Int?
+}
