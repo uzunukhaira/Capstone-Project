@@ -73,7 +73,7 @@ const DropdownUser = () => {
           <Image
             width={48}
             height={48}
-            src={user.image || "/images/default-avatar.jpg"}
+            src={user.image || "/images/karina.jpg"}
             alt="User Avatar"
             className="object-cover"
           />

@@ -31,7 +31,7 @@ export default function EditProfilePage() {
           },
         });
 
-        if (res.status === 401) {
+        if (!res.ok) {
           localStorage.removeItem("access_token");
           router.push("/login");
           return;
@@ -40,7 +40,9 @@ export default function EditProfilePage() {
         const data = await res.json();
         setUsername(data.username);
         setEmail(data.email);
-        setPreviewImage(`http://localhost:5000${data.profile_image}`);
+        if (data.profile_image) {
+          setPreviewImage(`http://localhost:5000${data.profile_image}`.replace(/([^:]\/)\/+/g, "$1"));
+        }
       } catch (error) {
         console.error("Gagal memuat profil:", error);
       } finally {
@@ -92,9 +94,11 @@ export default function EditProfilePage() {
 
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
-    if (file) {
+    if (file && file.type.startsWith("image/")) {
       setSelectedImage(file);
       setPreviewImage(URL.createObjectURL(file));
+    } else {
+      setMessage("File yang dipilih bukan gambar.");
     }
   };
 
@@ -102,80 +106,83 @@ export default function EditProfilePage() {
 
   return (
     <DefaultLayout>
-    <div className="p-8 max-w-xl mx-auto">
-      <h1 className="text-2xl font-bold mb-6">Edit Profil</h1>
+      <div className="p-8 max-w-xl mx-auto">
+        <h1 className="text-2xl font-bold mb-6">Edit Profil</h1>
 
-      {message && (
-        <div className="mb-4 p-2 bg-yellow-100 text-yellow-800 rounded">
-          {message}
-        </div>
-      )}
+        {message && (
+          <div className="mb-4 p-2 bg-yellow-100 text-yellow-800 rounded">
+            {message}
+          </div>
+        )}
 
-      <form onSubmit={handleSubmit} className="space-y-4 bg-white p-6 shadow rounded">
-        <div>
-          <label className="block mb-1 font-medium">Username</label>
-          <input
-            type="text"
-            value={username}
-            onChange={(e) => setUsername(e.target.value)}
-            className="w-full border px-3 py-2 rounded"
-            required
-          />
-        </div>
-
-        <div>
-          <label className="block mb-1 font-medium">Email</label>
-          <input
-            type="email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            className="w-full border px-3 py-2 rounded"
-            required
-          />
-        </div>
-
-        <div>
-          <label className="block mb-1 font-medium">Password Lama</label>
-          <input
-            type="password"
-            value={oldPassword}
-            onChange={(e) => setOldPassword(e.target.value)}
-            className="w-full border px-3 py-2 rounded"
-            placeholder="Biarkan kosong jika tidak mengubah"
-          />
-        </div>
-
-        <div>
-          <label className="block mb-1 font-medium">Password Baru</label>
-          <input
-            type="password"
-            value={newPassword}
-            onChange={(e) => setNewPassword(e.target.value)}
-            className="w-full border px-3 py-2 rounded"
-            placeholder="Biarkan kosong jika tidak mengubah"
-          />
-        </div>
-
-        <div>
-          <label className="block mb-1 font-medium">Foto Profil</label>
-          {previewImage && (
-            <img
-              src={previewImage}
-              alt="Preview"
-              className="w-24 h-24 rounded-full object-cover mb-2"
-            />
-          )}
-          <input type="file" accept="image/*" onChange={handleImageChange} />
-        </div>
-
-        <button
-          type="submit"
-          className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
+        <form
+          onSubmit={handleSubmit}
+          className="space-y-4 bg-white p-6 shadow rounded"
         >
-          Simpan Perubahan
-        </button>
-      </form>
-    </div>
+          <div>
+            <label className="block mb-1 font-medium">Username</label>
+            <input
+              type="text"
+              value={username}
+              onChange={(e) => setUsername(e.target.value)}
+              className="w-full border px-3 py-2 rounded"
+              required
+            />
+          </div>
+
+          <div>
+            <label className="block mb-1 font-medium">Email</label>
+            <input
+              type="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              className="w-full border px-3 py-2 rounded"
+              required
+            />
+          </div>
+
+          <div>
+            <label className="block mb-1 font-medium">Password Lama</label>
+            <input
+              type="password"
+              value={oldPassword}
+              onChange={(e) => setOldPassword(e.target.value)}
+              className="w-full border px-3 py-2 rounded"
+              placeholder="Biarkan kosong jika tidak mengubah"
+            />
+          </div>
+
+          <div>
+            <label className="block mb-1 font-medium">Password Baru</label>
+            <input
+              type="password"
+              value={newPassword}
+              onChange={(e) => setNewPassword(e.target.value)}
+              className="w-full border px-3 py-2 rounded"
+              placeholder="Biarkan kosong jika tidak mengubah"
+            />
+          </div>
+
+          <div>
+            <label className="block mb-1 font-medium">Foto Profil</label>
+            {previewImage && (
+              <img
+                src={previewImage}
+                alt="Preview"
+                className="w-24 h-24 rounded-full object-cover mb-2"
+              />
+            )}
+            <input type="file" accept="image/*" onChange={handleImageChange} />
+          </div>
+
+          <button
+            type="submit"
+            className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
+          >
+            Simpan Perubahan
+          </button>
+        </form>
+      </div>
     </DefaultLayout>
   );
 }

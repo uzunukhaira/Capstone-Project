@@ -24,14 +24,12 @@ def edit_profile():
     if not user:
         return jsonify({"msg": "User tidak ditemukan"}), 404
 
-    # Ambil data form
     username = request.form.get("username")
     email = request.form.get("email")
     old_password = request.form.get("old_password")
     new_password = request.form.get("new_password")
     image = request.files.get("profile_image")
 
-    # Update data jika ada perubahan
     if username:
         user.username = username
     if email:
@@ -43,17 +41,15 @@ def edit_profile():
         user.password = generate_password_hash(new_password)
 
     if image and allowed_file(image.filename):
-        # Simpan gambar dengan nama unik
         ext = image.filename.rsplit('.', 1)[1].lower()
         filename = f"{uuid.uuid4().hex}.{ext}"
         filepath = os.path.join(UPLOAD_FOLDER, filename)
         image.save(filepath)
-        user.profile_image = f"/{filepath}"  # simpan path relatif
+        user.profile_image = f"/static/uploads/{filename}"
 
-    # Simpan ke database
+
     db.session.commit()
 
-    # Respon
     return jsonify({
         "msg": "Profil berhasil diperbarui",
         "user": {
