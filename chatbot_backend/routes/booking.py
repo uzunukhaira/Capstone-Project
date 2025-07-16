@@ -1,4 +1,3 @@
-# routes/booking.py
 from flask import Blueprint, request, jsonify
 from flask_jwt_extended import jwt_required, get_jwt_identity
 from models import Booking, Kereta, db
@@ -36,7 +35,7 @@ def book_ticket():
             "rute": kereta.rute,
             "tanggal": kereta.tanggal.strftime("%d-%m-%Y"),
             "keberangkatan": kereta.keberangkatan.strftime("%H:%M"),
-            "lama_perjalanan": kereta.lama_perjalanan,  # Diperbaiki
+            "lama_perjalanan": kereta.lama_perjalanan,
         }
     }), 200
 
@@ -52,7 +51,7 @@ def history():
             "rute": t.kereta.rute,
             "tanggal": t.kereta.tanggal.strftime("%d-%m-%Y"),
             "keberangkatan": t.kereta.keberangkatan.strftime("%H:%M"),
-            "lama_perjalanan": t.kereta.lama_perjalanan, # Diperbaiki
+            "lama_perjalanan": t.kereta.lama_perjalanan,
             "waktu_pesan": t.tanggal_booking.strftime("%Y-%m-%d %H:%M:%S")
         }
         for t in bookings

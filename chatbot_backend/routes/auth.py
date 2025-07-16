@@ -5,7 +5,6 @@ from models import User, db
 
 bp = Blueprint("auth", __name__, url_prefix="/auth")
 
-# ✅ REGISTER
 @bp.route("/register", methods=["POST"])
 def register():
     data = request.get_json()
@@ -51,7 +50,6 @@ def login():
     if not user or not check_password_hash(user.password, password):
         return jsonify({"msg": "Email atau password salah"}), 401
 
-    # ✅ Kirim hanya user.id sebagai STRING
     access_token = create_access_token(identity=str(user.id))
 
     return jsonify({
@@ -65,7 +63,6 @@ def login():
     }), 200
 
 
-# ✅ GET CURRENT USER FROM TOKEN
 @bp.route("/me", methods=["GET"])
 @jwt_required()
 def get_current_user():

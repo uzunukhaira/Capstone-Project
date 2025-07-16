@@ -3,7 +3,6 @@ from models import db, Kereta
 from app import app
 from datetime import datetime
 
-# Load file Excel
 df = pd.read_excel("Jadwal KAI Maret 2025.xlsx")
 
 with app.app_context():

@@ -21,7 +21,6 @@ def extract_date(text):
         return datetime.strptime(f"{year}-{month}-{day}", "%Y-%m-%d").date()
     return None
 
-# Fungsi utama NLP
 def process_message(message):
     message = message.lower()
     tanggal_diminta = extract_date(message)
@@ -80,7 +79,6 @@ def process_message(message):
 
     return "🤖 Maaf, saya tidak mengerti maksud Anda. Gunakan kata kunci seperti: 'jadwal', 'lama perjalanan', 'kereta', atau 'lihat rute'."
 
-# CLI chatbot
 if __name__ == "__main__":
     print("=== Chatbot Jadwal KAI 🚆 ===")
     print("Contoh: 'jadwal dari Padang', 'jadwal kereta Padang 10 Maret'")
