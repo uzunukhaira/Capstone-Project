@@ -33,6 +33,7 @@ def process_message(message):
 
     kata_kunci = message.split()
     rute_cocok = df["rute"].apply(lambda r: any(k in r.lower() for k in kata_kunci))
+    
     if rute_cocok.any():
         filtered = filtered[rute_cocok]
     if tanggal_diminta:

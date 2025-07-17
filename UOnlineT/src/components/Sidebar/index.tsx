@@ -21,11 +21,10 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }: SidebarProps) => {
     if (storedRole) {
       setRole(storedRole);
     } else {
-      setRole("guest"); // default role
+      setRole("guest");
     }
   }, []);
 
-  // Jangan render apapun sampai role terbaca
   if (role === null) return null;
 
   const commonItems = [
@@ -34,6 +33,7 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }: SidebarProps) => {
 
   const adminItems = [
     { icon: <span>👤</span>, label: "User", route: "/users" },
+    { icon: <span>📜</span>, label: "Booking", route: "/book" },
     { icon: <span>📜</span>, label: "Riwayat", route: "/riwayat" },
     {
       icon: <span>⚙️</span>,
@@ -48,6 +48,7 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }: SidebarProps) => {
 
   const userItems = [
     { icon: <span>👤</span>, label: "Profil", route: "/profile" },
+    { icon: <span>📜</span>, label: "Booking", route: "/book" },
     { icon: <span>📜</span>, label: "Riwayat", route: "/riwayat" },
     { icon: <span>❓</span>, label: "Bantuan", route: "/bantuan" },
   ];

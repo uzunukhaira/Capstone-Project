@@ -6,8 +6,6 @@ from chatbot import get_bot_response
 
 chat_bp = Blueprint('chat', __name__, url_prefix='/api/chat')
 
-
-
 @chat_bp.route("", methods=["POST"])
 def chat():
     verify_jwt_in_request(optional=True)
